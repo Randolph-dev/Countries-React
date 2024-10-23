@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Button, Card, Col, Container, Form, ListGroup, Row, Spinner } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";  // Import useLocation
 import { initializeCountries } from "../services/countriesServices";
 import { search } from "../store/countriesSlice";
 import { addFavourite, removeFavourite } from "../store/favouritesSlice";
@@ -9,6 +9,7 @@ import Pagination from 'react-bootstrap/Pagination';
 
 const Countries = () => {
   const dispatch = useDispatch();
+  const location = useLocation();  // This is a react-router-dom Hook that allows us to access an object location with information about the URL we are visiting (including the state passed during navigation).
 
   // Redux state
   const countries = useSelector((state) => state.countries.countries);
@@ -16,49 +17,55 @@ const Countries = () => {
   const searchInput = useSelector((state) => state.countries.search);
   const favouritesList = useSelector((state) => state.favourites.favourites);
 
-  // Pagination state
+  // State for pagination and continent filtering
   const [activePage, setActivePage] = useState(1);
-  const itemsPerPage = 10; 
+  const itemsPerPage = 10;
 
-  // Total number of countries divided by number of countries per page to calculate amount of pages.
-  const totalPages = Math.ceil(countries.length / itemsPerPage);
+  // Set selected continent based on URL state or default to "All"
+  const [selectedContinent, setSelectedContinent] = useState(location.state?.continent || "All");
 
-  // Handle page change
-  const handlePageChange = (pageNumber) => {
-    setActivePage(pageNumber);
-  };
-
-  useEffect(() => {
-    dispatch(initializeCountries());
+    useEffect(() => {
+      dispatch(initializeCountries());
   }, [dispatch]);
 
-  // Handle loading state
-  if (isLoading) {
-    return (
-      <Col className="text-center m-5">
-        <Spinner
-          animation="border"
-          role="status"
-          className="center"
-          variant="info"
-        >
-          <span className="visually-hidden">Loading...</span>
-        </Spinner>
-      </Col>
-    );
-  }
+  // Filter by continent
+  const filterByContinent = (country) => {
+    if (selectedContinent === "All") return true;
 
-  // Apply search filter and then slice the data for pagination
+    if (selectedContinent === "North America" || selectedContinent === "South America") {
+      return country.region === "Americas";  // REST API uses "Americas" for both
+    }
+    
+    return country.region === selectedContinent; // Use 'region' to filter by continent
+  };
+
+  // Apply search filter and continent filter
   const filteredCountries = countries
     .filter((country) =>
       country.name.common.toLowerCase().includes(searchInput.toLowerCase())
     )
-    .slice((activePage - 1) * itemsPerPage, activePage * itemsPerPage);
+    .filter(filterByContinent);  // Apply continent filter
+
+  // Calculate the total number of pages based on the filtered countries
+  const totalPages = Math.ceil(filteredCountries.length / itemsPerPage);
+
+  // Slice the filtered countries for the current page
+  const paginatedCountries = filteredCountries.slice(
+    (activePage - 1) * itemsPerPage,
+    activePage * itemsPerPage
+  );
+
+  // Handle page change for pagination
+  const handlePageChange = (pageNumber) => {
+    setActivePage(pageNumber);
+  };
 
   return (
     <Container fluid>
+      
       <Row>
-        <Col className="mt-5 d-flex justify-context-center">
+        {/* Search Bar */}
+        <Col className="mt-5 d-flex justify-content-center">
           <Form>
             <Form.Control
               style={{ width: "18rem" }}
@@ -67,12 +74,33 @@ const Countries = () => {
               placeholder="Search"
               aria-label="Search"
               onChange={(e) => dispatch(search(e.target.value))}
-            />
+              />
           </Form>
         </Col>
       </Row>
+      
+          {/* Continent Filter Dropdown */}
+        <Row className="my-3 d-flex justify-content-left">
+          <Form.Select
+            style={{ width: "18rem" }}
+            value={selectedContinent}
+            onChange={(e) => {
+              setSelectedContinent(e.target.value);
+              setActivePage(1);  // Reset to the first page when the continent changes
+            }}
+          >
+            <option value="All">All Continents</option>
+            <option value="Europe">Europe</option>
+            <option value="Asia">Asia</option>
+            <option value="Africa">Africa</option>
+            <option value="Americas">Americas</option>
+            <option value="Oceania">Oceania</option>
+          </Form.Select>
+        </Row>
+
+      {/* Countries Display */}
       <Row xs={2} md={3} lg={4} className="g-3">
-        {filteredCountries.map((country) => {
+        {paginatedCountries.map((country) => {
           const isFavourite = favouritesList.includes(country.name.common);
 
           const handleToggleFavourite = () => {
@@ -144,50 +172,43 @@ const Countries = () => {
         })}
       </Row>
 
-      {/* Pagination Component */}
-      <Row className="justify-content-center mt-4">
-        <Col xs="auto">
-          <Pagination>
-            {/* Show first page */}
-            <Pagination.Item 
-              active={1 === activePage}
-              onClick={() => handlePageChange(1)}
-            >
-              1
-            </Pagination.Item>
-
-            {/* Ellipsis if too many pages */}
-            {activePage > 3 && <Pagination.Ellipsis />}
-
-            {/* Show up to 3 pages before and after the active page */}
-            {Array.from({ length: totalPages }, (_, index) => index + 1)
-              .filter((page) => page > 1 && page < totalPages)
-              .filter((page) => Math.abs(page - activePage) <= 2)
-              .map((page) => (
-                <Pagination.Item
-                  key={page}
-                  active={page === activePage}
-                  onClick={() => handlePageChange(page)}
-                >
-                  {page}
-                </Pagination.Item>
-              ))}
-
-            {/* Show ellipsis if there are more pages after */}
-            {activePage < totalPages - 2 && <Pagination.Ellipsis />}
-
-            {/* Show last page */}
-            {totalPages > 1 && (
-              <Pagination.Item
-                active={totalPages === activePage}
-                onClick={() => handlePageChange(totalPages)}
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <Row className="justify-content-center mt-4">
+          <Col xs="auto">
+            <Pagination>
+              <Pagination.Item 
+                active={1 === activePage}
+                onClick={() => handlePageChange(1)}
               >
-                {totalPages}
+                1
               </Pagination.Item>
-            )}
-          </Pagination>
-        </Col>
-      </Row>
+              {activePage > 3 && <Pagination.Ellipsis />}
+              {Array.from({ length: totalPages }, (_, index) => index + 1)
+                .filter((page) => page > 1 && page < totalPages)
+                .filter((page) => Math.abs(page - activePage) <= 2)
+                .map((page) => (
+                  <Pagination.Item
+                    key={page}
+                    active={page === activePage}
+                    onClick={() => handlePageChange(page)}
+                  >
+                    {page}
+                  </Pagination.Item>
+                ))}
+              {activePage < totalPages - 2 && <Pagination.Ellipsis />}
+              {totalPages > 1 && (
+                <Pagination.Item
+                  active={totalPages === activePage}
+                  onClick={() => handlePageChange(totalPages)}
+                >
+                  {totalPages}
+                </Pagination.Item>
+              )}
+            </Pagination>
+          </Col>
+        </Row>
+      )}
     </Container>
   );
 };
