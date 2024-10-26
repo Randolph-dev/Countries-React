@@ -1,8 +1,51 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Container, Row, Col, Button, Card, Form } from 'react-bootstrap';
-import { Link } from 'react-router-dom'; 
+import { Link, useNavigate } from 'react-router-dom'; 
+import { useDispatch, useSelector } from 'react-redux';
+import { initializeCountries } from '../store/countriesSlice'; 
 
 const HomePage = () => {
+  const [searchInput, setSearchInput] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const countries = useSelector((state) => state.countries.countries);
+
+  useEffect(() => {
+    console.log("Countries length:", countries.length);
+    if (countries.length === 0) {
+      console.log("Dispatching initializeCountries");
+      dispatch(initializeCountries());
+    } else {
+      setIsLoading(false);
+    }
+  }, [dispatch, countries.length]);
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (countries.length === 0) {
+      console.log("Countries not loaded yet");
+      alert('Countries are still loading. Please try again in a moment.');
+      return;
+    }
+    
+    const searchTerm = searchInput.toLowerCase().trim();
+    console.log("Search term:", searchTerm);
+    console.log("Countries:", countries);
+
+    const foundCountry = countries.find(country => 
+      country.name.common.toLowerCase() === searchTerm
+    );
+
+    console.log("Found country:", foundCountry);
+
+    if (foundCountry) {
+      navigate(`/countries/${foundCountry.name.common}`, { state: { country: foundCountry } });
+    } else {
+      alert('Country not found. Please try again.');
+    }
+  };
+
   return (
     <Container fluid>
       {/* Hero Section */}
@@ -17,12 +60,20 @@ const HomePage = () => {
       <Row className="text-center my-5">
         <Col>
           <h2>Search for a Country</h2>
-          <Form className="d-flex justify-content-center mt-3">
-            <Form.Control type="search" placeholder="Search for a country..." style={{ width: '300px' }} />
-            <Link to="/countries">
-              <Button variant="primary" size="lg">Browse Countries</Button>
-            </Link>            
-          </Form>
+          {isLoading ? (
+            <p>Loading countries...</p>
+          ) : (
+            <Form onSubmit={handleSearch} className="d-flex justify-content-center mt-3">
+              <Form.Control 
+                type="search" 
+                placeholder="Search for a country..." 
+                style={{ width: '300px' }} 
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+              />
+              <Button variant="primary" type="submit" size="lg">Search</Button>
+            </Form>
+          )}
         </Col>
       </Row>
 

@@ -1,4 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { getAllCountries } from "../services/countriesServices"; // Adjust this path if needed
 
 const initialState = {
   countries: [],
@@ -23,8 +24,20 @@ export const countriesSlice = createSlice({
   extraReducers() {},
 });
 
-// These are actions to be used in components later
 export const { getCountries, isLoading, search } = countriesSlice.actions;
 
-// This is the connection to store.js
+export const initializeCountries = () => {
+  return async (dispatch) => {
+    dispatch(isLoading(true));
+    try {
+      const countries = await getAllCountries();
+      dispatch(getCountries(countries));
+    } catch (error) {
+      console.error("Error fetching countries:", error);
+    } finally {
+      dispatch(isLoading(false));
+    }
+  };
+};
+
 export default countriesSlice.reducer;
