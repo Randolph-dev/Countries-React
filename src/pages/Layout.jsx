@@ -43,9 +43,13 @@ const Layout = () => {
       <Navbar bg={darkMode ? "dark" : "primary"} variant="dark" expand="lg" sticky="top">
         <Container>
           <Navbar.Brand href="/">Country Browser</Navbar.Brand>
+          <Button variant="outline-light" onClick={toggleDarkMode}>
+              {darkMode ? 'Light Mode' : 'Dark Mode'}
+            </Button>
           <Navbar.Toggle aria-controls="navbar-nav" />
           <Navbar.Collapse id="navbar-nav" className="justify-content-end">
             <Nav className="me-auto">
+              
               {/* Navigation Links */}
               <LinkContainer to="/">
                 <Nav.Link>Home</Nav.Link>
@@ -56,9 +60,7 @@ const Layout = () => {
               <LinkContainer to="/favourites">
                 <Nav.Link>Favourites</Nav.Link>
               </LinkContainer>
-            <Button variant="outline-light" onClick={toggleDarkMode}>
-              {darkMode ? 'Light Mode' : 'Dark Mode'}
-            </Button>
+            
             </Nav>
 
 

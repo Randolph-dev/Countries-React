@@ -35,7 +35,7 @@ const HomePage = () => {
               <Card.Title>Europe</Card.Title>
               <Card.Text>Discover countries in Europe.</Card.Text>
               <Link to="/countries">
-                <Button variant="primary" size="lg">Browse Countries</Button>
+                <Button variant="primary" size="lg">Explore Europe</Button>
               </Link>             
             </Card.Body>
           </Card>
@@ -47,7 +47,7 @@ const HomePage = () => {
               <Card.Title>Asia</Card.Title>
               <Card.Text>Learn about countries in Asia.</Card.Text>
               <Link to="/countries">
-                <Button variant="primary" size="lg">Browse Countries</Button>
+                <Button variant="primary" size="lg">Explore Asia</Button>
               </Link>
             </Card.Body>
           </Card>
@@ -58,9 +58,17 @@ const HomePage = () => {
             <Card.Body>
               <Card.Title>Africa</Card.Title>
               <Card.Text>Explore countries in Africa.</Card.Text>
-              <Link to="/countries">
-                <Button variant="primary" size="lg">Browse Countries</Button>
-              </Link>
+              <Button variant="primary" href="/countries?region=Africa">Explore Africa</Button>
+            </Card.Body>
+          </Card>
+        </Col>
+        <Col md={4}>
+          <Card>
+            <Card.Img variant="top" src="Americas.jpg" />
+            <Card.Body>
+              <Card.Title>Americas</Card.Title>
+              <Card.Text>Explore countries in the Americas.</Card.Text>
+              <Button variant="primary" href="/countries?region=Americas">Explore the Americas</Button>
             </Card.Body>
           </Card>
         </Col>

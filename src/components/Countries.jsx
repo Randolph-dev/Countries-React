@@ -10,6 +10,7 @@ import Pagination from 'react-bootstrap/Pagination';
 const Countries = () => {
   const dispatch = useDispatch();
   const location = useLocation();  // This is a react-router-dom Hook that allows us to access an object location with information about the URL we are visiting (including the state passed during navigation).
+  
 
   // Redux state
   const countries = useSelector((state) => state.countries.countries);
