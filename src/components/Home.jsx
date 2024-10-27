@@ -3,6 +3,7 @@ import { Container, Row, Col, Button, Card, Form } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom'; 
 import { useDispatch, useSelector } from 'react-redux';
 import { initializeCountries } from '../store/countriesSlice'; 
+import Swal from 'sweetalert2';
 
 const HomePage = () => {
   const [searchInput, setSearchInput] = useState('');
@@ -12,9 +13,7 @@ const HomePage = () => {
   const countries = useSelector((state) => state.countries.countries);
 
   useEffect(() => {
-    console.log("Countries length:", countries.length);
     if (countries.length === 0) {
-      console.log("Dispatching initializeCountries");
       dispatch(initializeCountries());
     } else {
       setIsLoading(false);
@@ -24,25 +23,30 @@ const HomePage = () => {
   const handleSearch = (e) => {
     e.preventDefault();
     if (countries.length === 0) {
-      console.log("Countries not loaded yet");
-      alert('Countries are still loading. Please try again in a moment.');
+      Swal.fire({
+        title: 'Loading',
+        text: 'Countries are still loading. Please try again in a moment.',
+        icon: 'warning',
+        confirmButtonText: 'OK'
+      });
       return;
     }
     
     const searchTerm = searchInput.toLowerCase().trim();
-    console.log("Search term:", searchTerm);
-    console.log("Countries:", countries);
 
     const foundCountry = countries.find(country => 
       country.name.common.toLowerCase() === searchTerm
     );
 
-    console.log("Found country:", foundCountry);
-
     if (foundCountry) {
       navigate(`/countries/${foundCountry.name.common}`, { state: { country: foundCountry } });
     } else {
-      alert('Country not found. Please try again.');
+      Swal.fire({
+        title: 'Not Found',
+        text: 'Country not found. Please try again.',
+        icon: 'error',
+        confirmButtonText: 'OK'
+      });
     }
   };
 
