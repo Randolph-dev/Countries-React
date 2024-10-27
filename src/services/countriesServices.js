@@ -5,7 +5,6 @@ const baseUrl = "https://restcountries.com/v3.1/all";
 
 const getAllCountries = async () => {
   const response = await axios.get(baseUrl);
-  console.log("Sample country data:", response.data[0]);
 
   return response.data;
 };
