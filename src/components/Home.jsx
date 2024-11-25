@@ -75,7 +75,7 @@ const HomePage = () => {
       {/* Search Section */}
       <Row className="text-center my-5">
         <Col>
-          <h2>Search for a Country</h2>
+          <h2>Country Finder</h2>
           {isLoading ? (
             <p>Loading countries...</p>
           ) : (

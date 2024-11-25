@@ -48,6 +48,7 @@ const Layout = () => {
             </Button>
           <Navbar.Toggle aria-controls="navbar-nav" />
           <Navbar.Collapse id="navbar-nav" className="justify-content-end">
+
             <Nav className="me-auto">
               
               {/* Navigation Links */}
@@ -59,6 +60,9 @@ const Layout = () => {
               </LinkContainer>
               <LinkContainer to="/favourites">
                 <Nav.Link>Favourites</Nav.Link>
+              </LinkContainer>
+              <LinkContainer to="/about">
+                <Nav.Link>About</Nav.Link>
               </LinkContainer>
             
             </Nav>
